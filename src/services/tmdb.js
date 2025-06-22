@@ -4,28 +4,26 @@ const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
 class TMDBService {
   async fetchData(endpoint, params = {}) {
-  try {
-    const url = new URL(`${BASE_URL}${endpoint}`);
-    url.searchParams.append('api_key', API_KEY);
+    try {
+      const url = new URL(`${BASE_URL}${endpoint}`);
+      url.searchParams.append('api_key', API_KEY);
 
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        url.searchParams.append(key, value);
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          url.searchParams.append(key, value);
+        }
+      });
+
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    });
-
-    console.log('Fetching:', url.toString()); // Add this line
-
-    const response = await fetch(url.toString());
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('TMDB API Error:', error);
+      throw error;
     }
-    return await response.json();
-  } catch (error) {
-    console.error('TMDB API Error:', error);
-    throw error;
   }
-}
 
   async getTrending() {
     return this.fetchData('/trending/movie/week');
@@ -66,10 +64,6 @@ class TMDBService {
 
   async getSimilarMovies(movieId) {
     return this.fetchData(`/movie/${movieId}/similar`);
-  }
-
-  async getMovieReviews(movieId) {
-    return this.fetchData(`/movie/${movieId}/reviews`);
   }
 
   getImageUrl(path, size = 'w500') {
